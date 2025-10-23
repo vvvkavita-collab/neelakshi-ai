@@ -8,38 +8,44 @@ from aiolimiter import AsyncLimiter
 load_dotenv()
 OPENAI_KEY = os.getenv('OPENAI_API_KEY')
 MODEL_ENDPOINT = os.getenv('MODEL_ENDPOINT', 'https://api.openai.com/v1/chat/completions')
-MODEL_NAME = os.getenv('MODEL_NAME', 'gpt-35-turbo')
+MODEL_NAME = os.getenv('MODEL_NAME', 'gpt-3.5-turbo')
 
 if not OPENAI_KEY:
     print('WARNING: OPENAI_API_KEY not set; backend will fail to call model provider')
 
 app = FastAPI(title='Neelakshi AI Backend')
 
-# ✅ Homepage route to avoid 404 on "/"
-@app.get("/")
+@app.get("/", tags=["Status"])
 def read_root():
     return {"message": "Neelakshi AI backend is live and ready to chat!"}
 
-# small rate limiter: 30 requests per minute
 limiter = AsyncLimiter(30, 60)
 
 class ChatRequest(BaseModel):
     messages: list
 
-@app.post('/chat')
+@app.post("/chat", tags=["Chat"])
 async def chat(req: ChatRequest):
     if not isinstance(req.messages, list) or len(req.messages) == 0:
         raise HTTPException(status_code=400, detail='messages required')
 
-    # Build messages payload for model
-    system_prompt = "You are Neelakshi AI, a helpful bilingual assistant (Hindi + English). Primary focus: producing clear news-style writing in Hindi when asked, and general chat otherwise. Be concise, factual, and avoid hallucinations. If uncertain, say you do not know."
-    model_messages = [
-        {"role": "system", "content": system_prompt}
-    ]
+    # ✅ Refined system prompt for ChatGPT-like behavior
+    system_prompt = """
+You are Neelakshi AI, a bilingual assistant (Hindi + English) designed for clear, conversational, and factual responses.
+Your primary focus is:
+- News-style writing in Hindi when asked for headlines or summaries
+- General conversation in either Hindi or English
+- Avoiding hallucinations or made-up facts
+If uncertain, say "माफ कीजिए, मुझे इसकी जानकारी नहीं है।"
+Respond concisely, clearly, and in a helpful tone.
+"""
+
+    # ✅ Build message flow
+    model_messages = [{"role": "system", "content": system_prompt}]
     for m in req.messages:
         role = m.get('role', 'user')
         content = m.get('text', '')
-        if role == 'system':
+        if role not in ['user', 'assistant']:
             continue
         model_messages.append({"role": role, "content": content})
 
@@ -60,5 +66,6 @@ async def chat(req: ChatRequest):
             try:
                 assistant_text = data['choices'][0]['message']['content']
             except Exception:
-                assistant_text = 'Sorry — upstream returned unexpected response.'
+                assistant_text = 'माफ कीजिए, मुझे इसका उत्तर नहीं मिल पाया।'
+
     return {'reply': assistant_text}
