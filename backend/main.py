@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from aiolimiter import AsyncLimiter
 
 load_dotenv()
-OPENAI_KEY = os.getenv('AIzaSyBct1bveZMAQvAB3gWN4TMoNwubi74HqWw')
+OPENAI_KEY = os.getenv('OPENAI_API_KEY')
 MODEL_ENDPOINT = os.getenv('MODEL_ENDPOINT', 'https://api.openai.com/v1/chat/completions')
 MODEL_NAME = os.getenv('MODEL_NAME', 'gpt-3.5-turbo')
 
