@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
 import httpx
@@ -6,7 +7,7 @@ from dotenv import load_dotenv
 from aiolimiter import AsyncLimiter
 
 load_dotenv()
-OPENAI_KEY = os.getenv('OPENAI_API_KEY')
+OPENAI_KEY = os.getenv('AIzaSyBct1bveZMAQvAB3gWN4TMoNwubi74HqWw')
 MODEL_ENDPOINT = os.getenv('MODEL_ENDPOINT', 'https://api.openai.com/v1/chat/completions')
 MODEL_NAME = os.getenv('MODEL_NAME', 'gpt-3.5-turbo')
 
@@ -14,6 +15,15 @@ if not OPENAI_KEY:
     print('WARNING: OPENAI_API_KEY not set; backend will fail to call model provider')
 
 app = FastAPI(title='Neelakshi AI Backend')
+
+# ✅ CORS middleware added to allow frontend access
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # You can replace "*" with your Vercel domain for security
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/", tags=["Status"])
 def read_root():
