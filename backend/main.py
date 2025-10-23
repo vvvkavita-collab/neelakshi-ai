@@ -69,11 +69,15 @@ Respond concisely, clearly, and in a helpful tone.
         async with httpx.AsyncClient(timeout=60.0) as client:
             resp = await client.post(MODEL_ENDPOINT, headers=headers, json=payload)
             if resp.status_code != 200:
+                print("OpenAI error:", resp.status_code, resp.text)
                 raise HTTPException(status_code=502, detail=f'Upstream error: {resp.text}')
             data = resp.json()
             try:
-                assistant_text = data['choices'][0]['message']['content']
-            except Exception:
+                assistant_text = data.get('choices', [{}])[0].get('message', {}).get('content', '').strip()
+                if not assistant_text:
+                    assistant_text = 'माफ कीजिए, मुझे इसका उत्तर नहीं मिल पाया।'
+            except Exception as e:
+                print("Error parsing OpenAI response:", e)
                 assistant_text = 'माफ कीजिए, मुझे इसका उत्तर नहीं मिल पाया।'
 
     return {'reply': assistant_text}
