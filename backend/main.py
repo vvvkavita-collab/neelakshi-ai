@@ -15,6 +15,11 @@ if not OPENAI_KEY:
 
 app = FastAPI(title='Neelakshi AI Backend')
 
+# ✅ Homepage route to avoid 404 on "/"
+@app.get("/")
+def read_root():
+    return {"message": "Neelakshi AI backend is live and ready to chat!"}
+
 # small rate limiter: 30 requests per minute
 limiter = AsyncLimiter(30, 60)
 
@@ -27,18 +32,14 @@ async def chat(req: ChatRequest):
         raise HTTPException(status_code=400, detail='messages required')
 
     # Build messages payload for model
-    # Merge system message (if any) and pass conversation
-    # Ensure system prompt emphasizes news writing in Hindi and bilingual responses
     system_prompt = "You are Neelakshi AI, a helpful bilingual assistant (Hindi + English). Primary focus: producing clear news-style writing in Hindi when asked, and general chat otherwise. Be concise, factual, and avoid hallucinations. If uncertain, say you do not know."
     model_messages = [
-        {"role":"system", "content": system_prompt}
+        {"role": "system", "content": system_prompt}
     ]
-    # append user/system/assistant messages except internal-system markers
     for m in req.messages:
-        role = m.get('role','user')
-        content = m.get('text','')
+        role = m.get('role', 'user')
+        content = m.get('text', '')
         if role == 'system':
-            # ignore client-provided system, or you can merge
             continue
         model_messages.append({"role": role, "content": content})
 
