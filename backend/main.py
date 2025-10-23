@@ -29,7 +29,6 @@ async def chat(req: ChatRequest):
     if not isinstance(req.messages, list) or len(req.messages) == 0:
         raise HTTPException(status_code=400, detail='messages required')
 
-    # ✅ Refined system prompt for ChatGPT-like behavior
     system_prompt = """
 You are Neelakshi AI, a bilingual assistant (Hindi + English) designed for clear, conversational, and factual responses.
 Your primary focus is:
@@ -40,7 +39,6 @@ If uncertain, say "माफ कीजिए, मुझे इसकी जा�
 Respond concisely, clearly, and in a helpful tone.
 """
 
-    # ✅ Build message flow
     model_messages = [{"role": "system", "content": system_prompt}]
     for m in req.messages:
         role = m.get('role', 'user')
