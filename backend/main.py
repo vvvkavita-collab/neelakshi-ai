@@ -9,10 +9,10 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = FastAPI(title="Neelakshi AI Backend")
 
-# CORS Middleware to allow frontend access
+# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can later replace "*" with your frontend URL for security
+    allow_origins=["*"],  # You can later replace "*" with your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,9 +29,9 @@ async def chat_endpoint(request: Request):
     if not user_message:
         return {"reply": "Koi message bhejein."}
 
-    # OpenAI Chat API call
+    # OpenAI Chat API call (new syntax for openai>=1.0.0)
     try:
-        response = openai.ChatCompletion.create(
+        response = openai.chat.completions.create(
             model="gpt-4o-mini",  # or "gpt-4" / "gpt-3.5-turbo"
             messages=[
                 {"role": "system", "content": "You are Neelakshi AI — helpful assistant speaking Hindi and English."},
@@ -40,7 +40,7 @@ async def chat_endpoint(request: Request):
             max_tokens=600,
             temperature=0.2
         )
-        reply = response.choices[0].message.get("content", "").strip()
+        reply = response.choices[0].message["content"].strip()
     except Exception as e:
         reply = f"Server error: {str(e)}"
 
