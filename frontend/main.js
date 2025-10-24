@@ -4,7 +4,7 @@ const messageInput = document.getElementById('message');
 const sendBtn = document.getElementById('sendBtn');
 
 // Deploy के बाद यह URL बदलना होगा
-const BACKEND_URL = "https://neelakshi-ai-backend.onrender.com/chat";
+const BACKEND_URL = "https://neelakshi-ai-backend.onrender.com/cht";
 
 function appendMessage(text, cls) {
   const d = document.createElement('div');
@@ -44,4 +44,5 @@ sendBtn.onclick = sendMessage;
 messageInput.addEventListener('keypress', function(e){
   if (e.key === 'Enter') sendMessage();
 });
+
 
